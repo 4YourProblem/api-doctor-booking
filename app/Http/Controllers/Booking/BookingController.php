@@ -19,7 +19,7 @@ class BookingController extends Controller
     public function showDoctor()
     {
         $user = Auth::user();
-        if ($user->role == User::ROLE_USER || User::ROLE_PATIENT) {
+        if (in_array($user->role, [User::ROLE_USER, User::ROLE_PATIENT])) {
             $doctor = Doctor::with([
                 'user' => function ($query) {
                     $query->select('name', 'id');
@@ -46,7 +46,7 @@ class BookingController extends Controller
             ->where('id', $id)
             ->first();
         $user = Auth::user();
-        if ($user->role == User::ROLE_USER || User::ROLE_PATIENT) {
+        if (in_array($user->role, [User::ROLE_USER, User::ROLE_PATIENT])) {
             $doctor->makeHidden([
                 'created_at', 'updated_at', 'deleted_at', 'id', 'user_id', 'approved', 'resume_path',
             ]);
@@ -65,7 +65,7 @@ class BookingController extends Controller
     {
         $doctor = Doctor::findOrFail($id);
         $user = Auth::user();
-        if ($user->role == User::ROLE_USER || User::ROLE_PATIENT) {
+        if (in_array($user->role, [User::ROLE_USER, User::ROLE_PATIENT])) {
             if ($request->hasFile('avatar')) {
                 $image = $request->file('avatar');
                 $filename = time() . '.' . $image->getClientOriginalExtension();
