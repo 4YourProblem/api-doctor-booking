@@ -60,7 +60,7 @@ php artisan passport:client --personal
 
 
 ## Usage
-+ Run browser is test
++ Run api is test
 ```bash
-http://localhost:9988
+https://4yourp.000webhostapp.com/api/
 ```
