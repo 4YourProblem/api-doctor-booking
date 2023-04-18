@@ -19,15 +19,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/register', 'Auth\RegisterController@register');
 Route::post('/login', 'Auth\LoginController@login');
-Route::post('/logout', 'Auth\LogoutController@logout');
 Route::post('/password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
 Route::post('/password/reset', 'Auth\ResetPasswordController@reset');
+Route::get('/doctors/search', 'Doctor\SearchController@search');
 
 Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
-    Route::post('/doctor', 'DoctorRequest\DoctorRequestController@doctorRequest');
-    Route::post('/booking/{id}', 'Booking\BookingController@booking');
+    Route::post('/logout', 'Auth\LogoutController@logout');
+    Route::post('/doctor/request', 'DoctorRequest\DoctorRequestController@doctorRequest');
     Route::get('/doctor', 'Booking\BookingController@showDoctor');
     Route::get('/doctor/{id}', 'Booking\BookingController@showDetailDoctor');
+    Route::post('/booking/{id}', 'Booking\BookingController@booking');
 });
 
 Route::group(['prefix' => 'doctor', 'middleware' => ['auth:api']], function () {
