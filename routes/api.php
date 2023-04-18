@@ -25,6 +25,8 @@ Route::get('/doctors/search', 'Doctor\SearchController@search');
 
 Route::group(['prefix' => 'user', 'middleware' => ['auth:api']], function () {
     Route::post('/logout', 'Auth\LogoutController@logout');
+    Route::get('/profile', 'Profile\ProfileController@index');
+    Route::post('/profile/{id}', 'Profile\ProfileController@update');
     Route::post('/doctor/request', 'DoctorRequest\DoctorRequestController@doctorRequest');
     Route::get('/doctor', 'Booking\BookingController@showDoctor');
     Route::get('/doctor/{id}', 'Booking\BookingController@showDetailDoctor');
