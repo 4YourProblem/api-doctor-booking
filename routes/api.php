@@ -43,6 +43,8 @@ Route::group(['prefix' => 'doctor', 'middleware' => ['auth:api']], function () {
 
 Route::group(['prefix' => 'patient', 'middleware' => ['auth:api']], function () {
     Route::post('/booking/{id}/cancel', 'Booking\BookingController@cancelBooking');
+    Route::get('/booking/history', 'Booking\BookingController@historyBooking');
+    Route::get('/booking/history/{id}', 'Booking\BookingController@detailHistoryBooking');
 });
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth:api']], function () {

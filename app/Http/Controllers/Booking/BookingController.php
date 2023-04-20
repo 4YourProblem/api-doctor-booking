@@ -103,12 +103,18 @@ class BookingController extends Controller
 
             try {
                 $result = app('geocoder')->geocode($address)->get();
-                $coordinates = $result->first()->getCoordinates();
-                $latitude = $coordinates->getLatitude();
-                $longitude = $coordinates->getLongitude();
+                $firstResult = $result->first();
+                if ($firstResult !== null) {
+                    $coordinates = $firstResult->getCoordinates();
+                    $latitude = $coordinates->getLatitude();
+                    $longitude = $coordinates->getLongitude();
+                } else {
+                    $latitude = Location::UNDEFINED;
+                    $longitude = Location::UNDEFINED;
+                }
             } catch (InvalidServerResponse $e) {
-                $latitude = null;
-                $longitude = null;
+                $latitude = Location::UNDEFINED;
+                $longitude = Location::UNDEFINED;
             }
 
             $location = Location::where([
@@ -132,15 +138,37 @@ class BookingController extends Controller
                 'doctor_id' => $doctor->id,
                 'patient_id' => $patient->id,
                 'location_id' => $location->id,
-                'booking_date' => Carbon::now()->format('Y-m-d'),
-                'booking_time' => Carbon::now()->format('H:i:s'),
+                'booking_date' => new Carbon($request->booking_date),
+                'booking_time' => new Carbon($request->booking_time),
                 'status' => Booking::STATUS_PENDING,
             ]);
             $booking->save();
             $user = $patient->user;
             $user->update(['role' => User::ROLE_PATIENT]);
 
-            return response()->json(['message' => 'You have successfully booked, please wait for the doctor to check']);
+            $showBooking = Booking::with([
+                'doctor.user' => function ($query) {
+                    $query->select('name', 'id');
+                },
+                'location' => function ($query) {
+                    $query->select('address', 'id');
+                },
+            ])
+                ->where('id', '=', $booking->id)
+                ->select('doctor_id', 'location_id', 'booking_date', 'booking_time', 'status')
+                ->get()
+                ->makeHidden(['doctor_id', 'location_id'])
+                ->each(function ($bookings) {
+                    $bookings->doctor->makeHidden([
+                        'id', 'user_id', 'education', 'work_experience',
+                        'resume_path', 'availability', 'created_at', 'updated_at', 'deleted_at'
+                    ]);
+                });
+
+            return response()->json([
+                'message' => 'You have successfully booked, please wait for the doctor to check',
+                'infor' => $showBooking
+            ]);
         } else {
             return response()->json(['message' => 'Sorry, you no permission to use this']);
         }
@@ -150,13 +178,68 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
         $user = Auth::user();
-        $patient = $user->patients->first()->id;
-        if ($user->role == User::ROLE_PATIENT && $booking->patient_id == $patient) {
+        $users = User::where('id', $user->id)->first();
+        if ($user->role == User::ROLE_PATIENT && $booking->patient->user == $users) {
             $booking->status = Booking::STATUS_CANCELLED;
             $booking->save();
         } else {
             return response()->json(['message' => 'You do not have permission to cancel this booking']);
         }
         return response()->json(['message' => 'Booking cancelled']);
+    }
+
+    public function historyBooking()
+    {
+        $user = Auth::user();
+        $users = User::where('id', $user->id)->first();
+        $booking = Booking::with([
+            'doctor.user' => function ($query) {
+                $query->select('name', 'id');
+            },
+            // 'location' => function ($query) {
+            //     $query->select('address', 'id');
+            // },
+        ])
+            ->join('patients', 'patients.id', '=', 'bookings.patient_id')
+            ->join('users', 'users.id', '=', 'patients.user_id')
+            ->where('users.id', '=', $users->id)
+            ->select('doctor_id', 'location_id', 'booking_date', 'booking_time', 'status')
+            ->get()
+            ->makeHidden(['doctor_id', 'location_id'])
+            ->each(function ($bookings) {
+                $bookings->doctor->makeHidden([
+                    'id', 'user_id', 'avatar', 'address', 'education', 'specialty', 'work_experience',
+                    'resume_path', 'availability', 'created_at', 'updated_at', 'deleted_at'
+                ]);
+            });
+        return response()->json($booking);
+    }
+
+    public function detailHistoryBooking($id)
+    {
+        $user = Auth::user();
+        $users = User::where('id', $user->id)->first();
+        $booking = Booking::with([
+            'doctor.user' => function ($query) {
+                $query->select('name', 'phone', 'id');
+            },
+            'location' => function ($query) {
+                $query->select('address', 'id');
+            },
+        ])
+            ->join('patients', 'patients.id', '=', 'bookings.patient_id')
+            ->join('users', 'users.id', '=', 'patients.user_id')
+            ->where('users.id', '=', $users->id)
+            ->where('bookings.id', '=', $id)
+            ->select('doctor_id', 'location_id', 'booking_date', 'booking_time', 'status')
+            ->get()
+            ->makeHidden(['doctor_id', 'location_id'])
+            ->each(function ($bookings) {
+                $bookings->doctor->makeHidden([
+                    'id', 'user_id', 'education', 'work_experience',
+                    'resume_path', 'availability', 'created_at', 'updated_at', 'deleted_at'
+                ]);
+            });
+        return response()->json($booking);
     }
 }

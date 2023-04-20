@@ -22,6 +22,8 @@ class Location extends Model
         'longitude',
 
     ];
+
+    const UNDEFINED = '0.0';
     protected $table = 'locations';
 
 
