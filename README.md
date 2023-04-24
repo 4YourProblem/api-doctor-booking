@@ -113,15 +113,15 @@ post/ email|password
 ```
 /get avatar|name|birthday|gender|medical_history|booking_date|booking_time|status
 ```
-+ doctor/id/accept
++ doctor/booking/id/accept
 ```
 /post id
 ```
-+ doctor/id/cancel
++ doctor/booking/id/cancel
 ```
 /post id
 ```
-+ doctor/id/complete
++ doctor/booking/id/complete
 ```
 /post id
 ```
