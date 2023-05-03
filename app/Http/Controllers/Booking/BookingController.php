@@ -33,7 +33,7 @@ class BookingController extends Controller
         } else {
             return response()->json(['message' => 'You no permission to do this']);
         }
-        return response()->json([$doctor]);
+        return response()->json($doctor);
     }
 
     public function showDetailDoctor($id)

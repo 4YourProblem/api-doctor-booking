@@ -17,3 +17,27 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::view('forgot_password', 'auth.reset_password')->name('password.reset');
+
+
+Route::get('/login', 'Admin\Web\AdminController@login')->name('login');
+Route::get('login', [
+    'as' => 'login',
+    'uses' => 'Admin\Web\AdminController@getLogin'
+]);
+
+Route::post('/login', [
+    'uses' => 'Admin\Web\AdminController@postLogin',
+    'as' => 'login'
+]);
+
+Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth']], function () {
+    Route::get('/user', 'Admin\Web\AdminController@user')->name('user');
+    Route::get('/user/{id}', 'Admin\Web\AdminController@destroyUser')->name('user.destroy');
+    Route::get('/doctor', 'Admin\Web\AdminController@doctor')->name('doctor');
+    Route::get('/doctor/{id}', 'Admin\Web\AdminController@destroyDoctor')->name('doctor.destroy');
+    Route::get('/patient', 'Admin\Web\AdminController@patient')->name('patient');
+    Route::get('/patient/{id}', 'Admin\Web\AdminController@destroyPatient')->name('patient.destroy');
+    Route::get('/doctor-request', 'Admin\Web\AdminController@doctorRequest')->name('doctor.request');
+    Route::get('/doctor/approve/{id}', 'Admin\Web\AdminController@approveDoctor')->name('doctor.approve');
+    Route::get('/doctor/refuse/{id}', 'Admin\Web\AdminController@refuseDoctor')->name('doctor.refuse');
+});

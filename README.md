@@ -64,6 +64,16 @@ php artisan passport:client --personal
 ```bash
 https://4yourp.000webhostapp.com/api/
 ```
+## ADMIN WEB
++ login
+```
+https://4yourp.000webhostapp.com/login
+```
++ email|password
+```
+admin@gmail.com | admin123
+```
+
 
 ## GET - POST API
 
