@@ -20,15 +20,13 @@ class BookingController extends Controller
     {
         $user = Auth::user();
         if (in_array($user->role, [User::ROLE_USER, User::ROLE_PATIENT])) {
-            $doctor = Doctor::with([
-                'user' => function ($query) {
-                    $query->select('name', 'id');
-                }
-            ])
+            $doctor = Doctor::join('users', 'users.id', '=', 'doctors.user_id')
+                ->orderBy('users.name')
+                ->select('doctors.id', 'avatar', 'specialty', 'availability', 'users.name', 'user_id')
                 ->get()
                 ->makeHidden([
                     'education', 'work_experience', 'created_at', 'updated_at', 'deleted_at',
-                    'id', 'user_id', 'approved', 'resume_path', 'address'
+                    'approved', 'resume_path', 'address'
                 ]);
         } else {
             return response()->json(['message' => 'You no permission to do this']);
@@ -48,7 +46,7 @@ class BookingController extends Controller
         $user = Auth::user();
         if (in_array($user->role, [User::ROLE_USER, User::ROLE_PATIENT])) {
             $doctor->makeHidden([
-                'created_at', 'updated_at', 'deleted_at', 'id', 'user_id', 'approved', 'resume_path',
+                'created_at', 'updated_at', 'deleted_at', 'approved', 'resume_path',
             ]);
 
             $patientCount = Booking::where('doctor_id', $doctor->id)
@@ -57,7 +55,10 @@ class BookingController extends Controller
                 ->distinct()
                 ->count('patient_id');
 
-            return response()->json([$doctor, 'patients' => $patientCount]);
+            return response()->json([
+                'info' => $doctor,
+                'patients' => $patientCount
+            ]);
         }
     }
 
