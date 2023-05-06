@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 Route::view('forgot_password', 'auth.reset_password')->name('password.reset');
 
 
@@ -41,3 +41,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth']], function ()
     Route::get('/doctor/approve/{id}', 'Admin\Web\AdminController@approveDoctor')->name('doctor.approve');
     Route::get('/doctor/refuse/{id}', 'Admin\Web\AdminController@refuseDoctor')->name('doctor.refuse');
 });
+
+Route::get('/', 'Web\HomeController@index')->name('index');
+Route::get('/menu', 'Web\HomeController@menu')->name('menu');
+Route::get('/booking', 'Web\HomeController@booking')->name('booking');
+Route::get('/doctor', 'Web\HomeController@doctor')->name('doctor');
+Route::get('/detail-doctor', 'Web\HomeController@detailDoctor')->name('detail-doctor');
+Route::get('/news', 'Web\HomeController@news')->name('news');
+Route::get('/contact', 'Web\HomeController@contact')->name('contact');
